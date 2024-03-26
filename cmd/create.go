@@ -1,60 +1,77 @@
 package cmd
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-	"os"
-
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
+
+	"github.com/SheltonFr/spring-initializr/core"
 )
 
-var createCmd = &cobra.Command{
-	Use:   "create",
+var createSpringBootCmd = &cobra.Command{
+	Use:   "create-sb-project",
 	Short: "Start the creation of the Spring Boot projct!",
-	Run:   testingThings,
+	Run:   runCreateSpringBootCmd,
+}
+
+var projectTypes []core.GenericType = core.GetProjectTypes()
+var languages []core.GenericType = core.GetLanguages()
+var packagingTypes []core.GenericType = core.GetPackagingTypes()
+
+func genericTypeToStringList(items []core.GenericType) []string {
+	var newItems []string
+	for _, item := range items {
+		newItems = append(newItems, item.Name)
+	}
+	return newItems
 }
 
 var qs = []*survey.Question{
 	{
-		Name: "Type",
+		Name:     "name",
+		Prompt:   &survey.Input{Message: "Project Name:"},
+		Validate: survey.Required,
+	},
+	{
+		Name: "type",
 		Prompt: &survey.Select{
-			Message: "Select the project type",
-			Options: []string{"Gradle - Groove", "Gradle - Kotlin", "Gradle Config", "Maven", "Maven POM"},
+			Message: "Select a project type",
+			Options: genericTypeToStringList(projectTypes),
+			Description: func(value string, index int) string {
+				return projectTypes[index].Description
+			},
 			Default: "Maven",
+		},
+	},
+	{
+		Name: "language",
+		Prompt: &survey.Select{
+			Message: "Select a language",
+			Options: genericTypeToStringList(languages),
+			Default: "Java",
+		},
+	},
+	{
+		Name: "packaging",
+		Prompt: &survey.Select{
+			Message: "Packaging:",
+			Options: genericTypeToStringList(packagingTypes),
+			Default: "Jar",
 		},
 	},
 }
 
-func testingThings(cmd *cobra.Command, args []string) {
-	answers := struct{}{}
-	survey.Ask(qs, &answers)
-}
-func runSpringInitializr(cmd *cobra.Command, args []string) {
-
-	result, err := http.Get("https://start.spring.io/metadata/client")
-	if err != nil {
+func runCreateSpringBootCmd(cmd *cobra.Command, args []string) {
+	answers := struct {
+		Name      string
+		Type      string
+		Language  string
+		Packaging string
+	}{}
+	if err := survey.Ask(qs, &answers); err != nil {
 		panic(err)
 	}
-
-	defer result.Body.Close()
-
-	file, err := os.Create("registries.json")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, result.Body)
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Done!!!")
 }
 
 func init() {
-	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(createSpringBootCmd)
 }

@@ -6,13 +6,13 @@ import (
 )
 
 type Generic interface {
-	GenericType | Dependencies | ProjectTypes
+	GenericType | Dependencies | ProjectTypes | Languages | PackagingType
 }
 
 type GenericType struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
-	Description string `json:"description"`
+	Description string `json:"description,omitempty"`
 }
 
 type ProjectTypes struct {
@@ -30,12 +30,35 @@ type Dependencies struct {
 	} `json:"dependencies"`
 }
 
+type Languages struct {
+	Languages struct {
+		Values []GenericType `json:"values"`
+	} `json:"language"`
+}
+
+type PackagingType struct {
+	Packaging struct {
+		Values []GenericType `json:"values"`
+	} `json:"packaging"`
+}
+
 func GetProjectTypes() []GenericType {
 	var data ProjectTypes
 	parseRegistriesFile(&data)
 	return data.ProjectTypes.Types
 }
 
+func GetLanguages() []GenericType {
+	var data Languages
+	parseRegistriesFile(&data)
+	return data.Languages.Values
+}
+
+func GetPackagingTypes() []GenericType {
+	var data PackagingType
+	parseRegistriesFile(&data)
+	return data.Packaging.Values
+}
 func parseRegistriesFile[T Generic](target *T) error {
 	file, err := os.Open("registries.json")
 	if err != nil {
