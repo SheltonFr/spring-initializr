@@ -5,7 +5,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "springinit",
+	Use:   "spring",
 	Short: "A powerfull development-tool which provide an easy way of creating spring boot projects!",
 }
 

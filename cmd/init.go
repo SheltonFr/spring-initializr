@@ -8,7 +8,7 @@ import (
 )
 
 var createSpringBootCmd = &cobra.Command{
-	Use:   "create-sb-project",
+	Use:   "init",
 	Short: "Start the creation of the Spring Boot projct!",
 	Run:   runCreateSpringBootCmd,
 }
