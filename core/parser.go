@@ -6,7 +6,7 @@ import (
 )
 
 type Generic interface {
-	GenericType | Dependencies | ProjectTypes | Languages | PackagingType
+	GenericType | Dependencies | ProjectTypes | Languages | PackagingType | JavaVserions | BootVersions
 }
 
 type GenericType struct {
@@ -30,6 +30,19 @@ type Dependencies struct {
 	} `json:"dependencies"`
 }
 
+func GetDependencies() []GenericType {
+	var data Dependencies
+	parseRegistriesFile(&data)
+
+	dependencies := []GenericType{}
+	for _, value := range data.Dependencies.Values {
+		dependencies = append(dependencies, value.Dependencies...)
+	}
+
+	return dependencies
+
+}
+
 type Languages struct {
 	Languages struct {
 		Values []GenericType `json:"values"`
@@ -48,6 +61,28 @@ func GetProjectTypes() []GenericType {
 	return data.ProjectTypes.Types
 }
 
+type JavaVserions struct {
+	Versions struct {
+		Values []GenericType `json:"values"`
+	} `json:"javaVersion"`
+}
+
+type BootVersions struct {
+	Versions struct {
+		Values []GenericType `json:"values"`
+	} `json:"bootVersion"`
+}
+
+func GetBootVersions() []GenericType {
+	var data BootVersions
+	parseRegistriesFile(&data)
+	return data.Versions.Values
+}
+func GetJavaVersions() []GenericType {
+	var data JavaVserions
+	parseRegistriesFile(&data)
+	return data.Versions.Values
+}
 func GetLanguages() []GenericType {
 	var data Languages
 	parseRegistriesFile(&data)
